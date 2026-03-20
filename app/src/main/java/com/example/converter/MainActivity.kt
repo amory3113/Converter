@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.converter.presentation.screens.ConverterScreen
+import com.example.converter.presentation.screens.MainScreen
 import com.example.converter.presentation.theme.ConverterTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -28,7 +29,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ConverterScreen()
+                    MainScreen()
                 }
             }
         }

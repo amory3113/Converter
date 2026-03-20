@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Converter</string>
+
+    <string name="tab_exchange">Обмен</string>
+    <string name="tab_multi">Мульти</string>
+    <string name="tab_settings">Настройки</string>
+
+    <string name="title_converter">Конвертер</string>
+    <string name="status_actual_offline">Актуально на 14:30 (Офлайн)</string>
+    <string name="label_from">У меня есть (Отдаю)</string>
+    <string name="label_to">Я получу</string>
+    <string name="label_commission">Комиссия банка (%)</string>
+</resources>
