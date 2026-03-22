@@ -41,6 +41,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.converter.presentation.viewmodel.ConverterViewModel
 import com.example.converter.presentation.viewmodel.CurrencyUiState
@@ -75,16 +76,19 @@ fun ConverterScreen(viewModel: ConverterViewModel = hiltViewModel()) {
 fun ConverterContent(state: CurrencyUiState.Success){
     var amountFrom by remember { mutableStateOf("1000")}
     var amountTo by remember { mutableStateOf("924.50")}
+    var isCommissionEnabled by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(20.dp)
     ) {
         Text(
             text = stringResource(R.string.title_converter),
             style = MaterialTheme.typography.headlineMedium,
-            color = Color(0xFF191C1E)
+            color = MaterialTheme.colorScheme.onBackground,
+            fontSize = 32.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -93,24 +97,35 @@ fun ConverterContent(state: CurrencyUiState.Success){
             Icon(
                 painter = painterResource(R.drawable.ic_launcher_foreground),
                 contentDescription = null,
-                tint = Color(0xFF4285F4),
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(16.dp)
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = stringResource(R.string.status_actual_offline),
                 style = MaterialTheme.typography.labelMedium,
-                color = Color(0xFF74777F)
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                fontSize = 16.sp
             )
         }
+        Spacer(modifier = Modifier.height(30.dp))
         Box(modifier = Modifier.fillMaxWidth()) {
             Column{
                 CurrencyInputCard(
-                    label = stringResource(R.string.label_to),
-                    currencyCode = "EUR",
+                    label = stringResource(R.string.label_from),
+                    currencyCode = state.baseCurrency,
                     amount = amountTo,
                     onAmountChange = { amountTo = it },
                     isEditable = false
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                CurrencyInputCard(
+                    label = stringResource(R.string.label_to),
+                    currencyCode = "EUR",
+                    amount = amountFrom,
+                    onAmountChange = { amountTo = it },
+                    isEditable = false,
+                    amountColor = MaterialTheme.colorScheme.primary
                 )
             }
             IconButton(
@@ -118,18 +133,22 @@ fun ConverterContent(state: CurrencyUiState.Success){
                 modifier = Modifier
                     .size(44.dp)
                     .align(Alignment.Center)
-                    .offset(y = (-6).dp)
+                    .zIndex(1f)
                     .background(Color(0xFF6750A4), CircleShape)
             ){
                 Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
+                    painter = painterResource(id = R.drawable.ic_swap_vertical),
                     contentDescription = "Swap currencies",
                     tint = Color.White,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
         Spacer(modifier = Modifier.height(24.dp))
-        CommissionCard()
+        CommissionCard(
+            isCommissionEnabled = isCommissionEnabled,
+            onCheckedChange = {isCommissionEnabled = it}
+        )
     }
 }
 
@@ -140,19 +159,20 @@ fun CurrencyInputCard(
     currencyCode: String,
     amount: String,
     onAmountChange: (String) -> Unit,
-    isEditable: Boolean
+    isEditable: Boolean,
+    amountColor: Color = MaterialTheme.colorScheme.onSurface
 ){
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.LightGray),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ){
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                color = Color(0xFF74777F)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
             Spacer(modifier = Modifier.height(12.dp))
             Row(
@@ -165,7 +185,7 @@ fun CurrencyInputCard(
 
                     },
                     shape = RoundedCornerShape(50.dp),
-                    color = Color(0xFFF1F3F4)
+                    color = MaterialTheme.colorScheme.surfaceVariant
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -179,14 +199,13 @@ fun CurrencyInputCard(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(text = currencyCode,
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            color = Color(0xFF191C1E)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
                             contentDescription = null,
-                            tint = Color(0xFF44474E),
-                            modifier = Modifier.size(20.dp)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -195,7 +214,7 @@ fun CurrencyInputCard(
                     onValueChange = onAmountChange,
                     readOnly = !isEditable,
                     textStyle = MaterialTheme.typography.headlineMedium.copy(
-                        color = if(isEditable) Color(0xFF191C1E) else Color(0xFF6750A4),
+                        color = amountColor,
                         textAlign = TextAlign.End,
                         fontSize = 32.sp
                     ),
@@ -211,11 +230,15 @@ fun CurrencyInputCard(
 }
 
 @Composable
-fun CommissionCard(){
+fun CommissionCard(
+    isCommissionEnabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+){
     Card(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
@@ -225,20 +248,19 @@ fun CommissionCard(){
             Text(
                 text = stringResource(R.string.label_commission),
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFF191C1E)
+                color = MaterialTheme.colorScheme.onSurface
             )
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = Color(0xFFF1F3F4)
-            ) {
-                Text(
-                    text = "2.0%",
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    color = Color(0xFF6750A4)
+            Switch(
+                checked = isCommissionEnabled,
+                onCheckedChange = onCheckedChange,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary, // Цвет тумблера во вкл. состоянии
+                    checkedTrackColor = MaterialTheme.colorScheme.primary,   // Цвет дорожки во вкл. состоянии
+                    uncheckedThumbColor = MaterialTheme.colorScheme.outline, // Цвет тумблера в выкл. состоянии
+                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant // Цвет дорожки в выкл. состоянии
                 )
-            }
+            )
         }
-
     }
 }
+
