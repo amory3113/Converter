@@ -15,6 +15,13 @@ class ConverterViewModel @Inject constructor(
     private val repository: CurrencyRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<CurrencyUiState>(CurrencyUiState.Loading)
+
+    private val _amountFrom = MutableStateFlow("")
+    val amountFrom: StateFlow<String> = _amountFrom.asStateFlow()
+    private val _fromCurrency = MutableStateFlow("USD")
+    val fromCurrency: StateFlow<String> = _fromCurrency.asStateFlow()
+    private val _toCurrency = MutableStateFlow("EUR")
+    val toCurrency: StateFlow<String> = _toCurrency.asStateFlow()
     val uiState: StateFlow<CurrencyUiState> = _uiState.asStateFlow()
     init {
         fetchRates("USD")
@@ -39,5 +46,26 @@ class ConverterViewModel @Inject constructor(
                 }
             )
         }
+    }
+    fun updateAmount(newAmount: String){
+        val sanitizerAmount = newAmount.replace(",", ".")
+        if(sanitizerAmount.isEmpty() || sanitizerAmount.matches(Regex("^\\d*\\.?\\d*$"))){
+            _amountFrom.value = sanitizerAmount
+        }
+    }
+    fun calculateResult(rates: Map<String, Double>, isCommissionEnabled: Boolean): String{
+        val amount = _amountFrom.value.toDoubleOrNull() ?: return ""
+        val rateFrom = rates[_fromCurrency.value] ?: 1.0
+        val rateTo = rates[_toCurrency.value] ?: 1.0
+        var result = (amount / rateFrom) * rateTo
+        if (isCommissionEnabled) {
+            result -= result * 0.02
+        }
+        return String.format(java.util.Locale.US, "%.2f", result)
+    }
+    fun swapCurrencies() {
+        val tempCurrency = _fromCurrency.value
+        _fromCurrency.value = _toCurrency.value
+        _toCurrency.value = tempCurrency
     }
 }

@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.converter.presentation.viewmodel.ConverterViewModel
 import com.example.converter.presentation.viewmodel.CurrencyUiState
 import java.util.Currency
@@ -67,16 +68,21 @@ fun ConverterScreen(viewModel: ConverterViewModel = hiltViewModel()) {
                 Text("Error")
             }
             is CurrencyUiState.Success -> {
-                ConverterContent(state)
+                ConverterContent(state, viewModel)
+            }
+            is CurrencyUiState.Success -> {
+                ConverterContent(state, viewModel)
             }
         }
     }
 }
 @Composable
-fun ConverterContent(state: CurrencyUiState.Success){
-    var amountFrom by remember { mutableStateOf("1000")}
-    var amountTo by remember { mutableStateOf("924.50")}
+fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewModel){
+    val amountFrom by viewModel.amountFrom.collectAsState()
+    val fromCurrency by viewModel.fromCurrency.collectAsState()
+    val toCurrency by viewModel.toCurrency.collectAsState()
     var isCommissionEnabled by remember { mutableStateOf(false) }
+    val amountTo = viewModel.calculateResult(state.rates, isCommissionEnabled)
 
     Column(
         modifier = Modifier
@@ -113,23 +119,23 @@ fun ConverterContent(state: CurrencyUiState.Success){
             Column{
                 CurrencyInputCard(
                     label = stringResource(R.string.label_from),
-                    currencyCode = state.baseCurrency,
-                    amount = amountTo,
-                    onAmountChange = { amountTo = it },
-                    isEditable = false
+                    currencyCode = fromCurrency,
+                    amount = amountFrom,
+                    onAmountChange = { viewModel.updateAmount(it) },
+                    isEditable = true
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 CurrencyInputCard(
                     label = stringResource(R.string.label_to),
-                    currencyCode = "EUR",
-                    amount = amountFrom,
-                    onAmountChange = { amountTo = it },
+                    currencyCode = toCurrency,
+                    amount = amountTo,
+                    onAmountChange = { },
                     isEditable = false,
                     amountColor = MaterialTheme.colorScheme.primary
                 )
             }
             IconButton(
-                onClick = { /*TODO*/ },
+                onClick = { viewModel.swapCurrencies() },
                 modifier = Modifier
                     .size(44.dp)
                     .align(Alignment.Center)
@@ -219,10 +225,25 @@ fun CurrencyInputCard(
                         fontSize = 32.sp
                     ),
                     modifier = Modifier.weight(1f).padding(start = 16.dp),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    singleLine = true
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    decorationBox = { innerTextField ->
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.CenterEnd){
+                            if(amount.isEmpty()){
+                                Text(
+                                    text = "0",
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), // Полупрозрачный цвет
+                                        textAlign = TextAlign.End,
+                                        fontSize = 32.sp
+                                    )
+                                )
+                            }
+                            innerTextField()
+                        }
+                    }
                 )
             }
         }
