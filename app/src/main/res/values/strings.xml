@@ -10,4 +10,9 @@
     <string name="label_from">I have (Give)</string>
     <string name="label_to">I will get</string>
     <string name="label_commission">Bank commission (%)</string>
+
+    <string name="title_select_currency">Select currency</string>
+    <string name="search_hint">Search currency or country...</string>
+    <string name="category_favorites">FAVORITES</string>
+    <string name="category_all">ALL CURRENCIES</string>
 </resources>

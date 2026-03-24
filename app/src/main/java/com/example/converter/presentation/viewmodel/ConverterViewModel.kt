@@ -26,6 +26,17 @@ class ConverterViewModel @Inject constructor(
     init {
         fetchRates("USD")
     }
+    private val _favorites = MutableStateFlow<Set<String>>(setOf("USD", "EUR"))
+    val favorites: StateFlow<Set<String>> = _favorites.asStateFlow()
+    fun toggleFavorite(currencyCode: String){
+        val currencyFavorites = _favorites.value.toMutableSet()
+        if(currencyFavorites.contains(currencyCode)){
+            currencyFavorites.remove(currencyCode)
+        } else {
+            currencyFavorites.add(currencyCode)
+        }
+        _favorites.value = currencyFavorites
+    }
     fun fetchRates(baseCurrency: String) {
         viewModelScope.launch {
             _uiState.value = CurrencyUiState.Loading
@@ -67,5 +78,12 @@ class ConverterViewModel @Inject constructor(
         val tempCurrency = _fromCurrency.value
         _fromCurrency.value = _toCurrency.value
         _toCurrency.value = tempCurrency
+    }
+    fun selectCurrency(currencyCode: String, isFrom: Boolean){
+        if(isFrom){
+            _fromCurrency.value = currencyCode
+        }else{
+            _toCurrency.value = currencyCode
+        }
     }
 }

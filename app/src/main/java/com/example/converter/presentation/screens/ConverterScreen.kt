@@ -19,6 +19,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -48,9 +51,10 @@ import com.example.converter.presentation.viewmodel.ConverterViewModel
 import com.example.converter.presentation.viewmodel.CurrencyUiState
 import java.util.Currency
 import com.example.converter.R
+import com.example.converter.presentation.getFlagUrl
 
 @Composable
-fun ConverterScreen(viewModel: ConverterViewModel = hiltViewModel()) {
+fun ConverterScreen(viewModel: ConverterViewModel = hiltViewModel(), onNavigateToSelectCurrency: (Boolean) -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
 
     Box(modifier = Modifier
@@ -68,16 +72,16 @@ fun ConverterScreen(viewModel: ConverterViewModel = hiltViewModel()) {
                 Text("Error")
             }
             is CurrencyUiState.Success -> {
-                ConverterContent(state, viewModel)
+                ConverterContent(state, viewModel, onNavigateToSelectCurrency)
             }
             is CurrencyUiState.Success -> {
-                ConverterContent(state, viewModel)
+                ConverterContent(state, viewModel, onNavigateToSelectCurrency)
             }
         }
     }
 }
 @Composable
-fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewModel){
+fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewModel, onCurrencyClick: (Boolean) -> Unit){
     val amountFrom by viewModel.amountFrom.collectAsState()
     val fromCurrency by viewModel.fromCurrency.collectAsState()
     val toCurrency by viewModel.toCurrency.collectAsState()
@@ -122,6 +126,7 @@ fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewMod
                     currencyCode = fromCurrency,
                     amount = amountFrom,
                     onAmountChange = { viewModel.updateAmount(it) },
+                    onCurrencyClick = { onCurrencyClick(true) },
                     isEditable = true
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -130,6 +135,7 @@ fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewMod
                     currencyCode = toCurrency,
                     amount = amountTo,
                     onAmountChange = { },
+                    onCurrencyClick = { onCurrencyClick(false) },
                     isEditable = false,
                     amountColor = MaterialTheme.colorScheme.primary
                 )
@@ -165,6 +171,7 @@ fun CurrencyInputCard(
     currencyCode: String,
     amount: String,
     onAmountChange: (String) -> Unit,
+    onCurrencyClick: () -> Unit,
     isEditable: Boolean,
     amountColor: Color = MaterialTheme.colorScheme.onSurface
 ){
@@ -187,9 +194,7 @@ fun CurrencyInputCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ){
                 Surface(
-                    onClick = {
-
-                    },
+                    onClick = onCurrencyClick,
                     shape = RoundedCornerShape(50.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant
                 ) {
@@ -197,10 +202,13 @@ fun CurrencyInputCard(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ){
-                        Box(
+                        AsyncImage(
+                            model = getFlagUrl(currencyCode),
+                            contentDescription = "$currencyCode flag",
                             modifier = Modifier
-                                .size(24.dp, 16.dp)
-                                .background(Color.LightGray, RoundedCornerShape(2.dp))
+                                .size(28.dp, 20.dp)
+                                .clip(RoundedCornerShape(3.dp)),
+                            contentScale = ContentScale.Crop
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(text = currencyCode,

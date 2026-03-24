@@ -11,4 +11,9 @@
     <string name="label_from">У меня есть (Отдаю)</string>
     <string name="label_to">Я получу</string>
     <string name="label_commission">Комиссия банка (%)</string>
+
+    <string name="title_select_currency">Выбрать валюту</string>
+    <string name="search_hint">Поиск валюты или страны...</string>
+    <string name="category_favorites">ИЗБРАННЫЕ</string>
+    <string name="category_all">ВСЕ ВАЛЮТЫ</string>
 </resources>

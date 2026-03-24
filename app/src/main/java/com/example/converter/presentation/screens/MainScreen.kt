@@ -7,16 +7,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.converter.presentation.navigation.Screen
+import com.example.converter.presentation.viewmodel.ConverterViewModel
 
 @Composable
-fun MainScreen(){
+fun MainScreen(
+    viewModel: ConverterViewModel = hiltViewModel()
+){
     val navController = rememberNavController()
     val items = listOf(
         Screen.Exchange,
@@ -57,13 +63,31 @@ fun MainScreen(){
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Exchange.route){
-                ConverterScreen()
+                ConverterScreen(
+                    viewModel = viewModel,
+                    onNavigateToSelectCurrency = {
+                        isFrom ->
+                        navController.navigate("currency_selection/$isFrom")
+                    }
+                )
             }
             composable(Screen.Multi.route){
                 Text("zaglushka")
             }
             composable(Screen.Setting.route){
                 Text("zaglushka")
+            }
+            composable(
+                route = "currency_selection/{isFrom}",
+                arguments = listOf(navArgument("isFrom") { type = NavType.BoolType })
+            ) { backStackEntry ->
+                val isFrom = backStackEntry.arguments?.getBoolean("isFrom") ?: true
+
+                CurrencySelectionScreen(
+                    isFrom = isFrom,
+                    viewModel = viewModel,
+                    onBackClick = { navController.popBackStack() }
+                )
             }
         }
     }
