@@ -37,6 +37,8 @@ class ConverterViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), setOf("USD", "EUR"))
     val isCommissionEnabled = userPrefsRepository.isCommissionEnabledFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    val commissionValue = userPrefsRepository.commissionValueFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 2.0f)
 
     fun toggleFavorite(currencyCode: String) {
         viewModelScope.launch {
@@ -82,9 +84,19 @@ class ConverterViewModel @Inject constructor(
         val rateTo = rates[_toCurrency.value] ?: 1.0
         var result = (amount / rateFrom) * rateTo
         if (isCommissionEnabled) {
-            result -= result * 0.02
+            val percentage = commissionValue.value / 100.0
+            result -= result * percentage
         }
         return String.format(java.util.Locale.US, "%.2f", result)
+    }
+    fun updateCommissionValue(newValue: String) {
+        val sanitized = newValue.replace(",", ".")
+        val floatValue = sanitized.toFloatOrNull()
+        if(floatValue != null && floatValue >= 0f){
+            viewModelScope.launch {
+                userPrefsRepository.saveCommissionsValue(floatValue)
+            }
+        }
     }
     fun swapCurrencies() {
         viewModelScope.launch {

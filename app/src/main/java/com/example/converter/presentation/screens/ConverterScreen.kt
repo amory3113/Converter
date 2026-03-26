@@ -86,6 +86,7 @@ fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewMod
     val fromCurrency by viewModel.fromCurrency.collectAsState()
     val toCurrency by viewModel.toCurrency.collectAsState()
     val isCommissionEnabled by viewModel.isCommissionEnabled.collectAsState()
+    val commissionValue by viewModel.commissionValue.collectAsState()
     val amountTo = viewModel.calculateResult(state.rates, isCommissionEnabled)
 
     Column(
@@ -159,6 +160,7 @@ fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewMod
         Spacer(modifier = Modifier.height(24.dp))
         CommissionCard(
             isCommissionEnabled = isCommissionEnabled,
+            commissionValue = commissionValue,
             onCheckedChange = {viewModel.setCommissionEnabled(it)}
         )
     }
@@ -261,6 +263,7 @@ fun CurrencyInputCard(
 @Composable
 fun CommissionCard(
     isCommissionEnabled: Boolean,
+    commissionValue: Float,
     onCheckedChange: (Boolean) -> Unit
 ){
     Card(
@@ -275,7 +278,7 @@ fun CommissionCard(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = stringResource(R.string.label_commission),
+                text = stringResource(R.string.label_commission) + " ($commissionValue%)",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -283,10 +286,10 @@ fun CommissionCard(
                 checked = isCommissionEnabled,
                 onCheckedChange = onCheckedChange,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary, // Цвет тумблера во вкл. состоянии
-                    checkedTrackColor = MaterialTheme.colorScheme.primary,   // Цвет дорожки во вкл. состоянии
-                    uncheckedThumbColor = MaterialTheme.colorScheme.outline, // Цвет тумблера в выкл. состоянии
-                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant // Цвет дорожки в выкл. состоянии
+                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                    checkedTrackColor = MaterialTheme.colorScheme.primary,
+                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             )
         }

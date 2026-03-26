@@ -75,7 +75,9 @@ fun MainScreen(
                 Text("zaglushka")
             }
             composable(Screen.Setting.route){
-                Text("zaglushka")
+                SettingScreen(
+                    viewModel = viewModel
+                )
             }
             composable(
                 route = "currency_selection/{isFrom}",
