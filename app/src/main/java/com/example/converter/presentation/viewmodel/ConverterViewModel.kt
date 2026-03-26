@@ -2,40 +2,52 @@ package com.example.converter.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.converter.data.presentation.UserPreferencesRepository
 import com.example.converter.domain.repository.CurrencyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
-    private val repository: CurrencyRepository
+    private val repository: CurrencyRepository,
+    private val userPrefsRepository: UserPreferencesRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<CurrencyUiState>(CurrencyUiState.Loading)
 
     private val _amountFrom = MutableStateFlow("")
     val amountFrom: StateFlow<String> = _amountFrom.asStateFlow()
     private val _fromCurrency = MutableStateFlow("USD")
-    val fromCurrency: StateFlow<String> = _fromCurrency.asStateFlow()
+    val fromCurrency = userPrefsRepository.fromCurrencyFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "USD")
     private val _toCurrency = MutableStateFlow("EUR")
-    val toCurrency: StateFlow<String> = _toCurrency.asStateFlow()
+    val toCurrency = userPrefsRepository.toCurrencyFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "EUR")
     val uiState: StateFlow<CurrencyUiState> = _uiState.asStateFlow()
     init {
         fetchRates("USD")
     }
     private val _favorites = MutableStateFlow<Set<String>>(setOf("USD", "EUR"))
-    val favorites: StateFlow<Set<String>> = _favorites.asStateFlow()
-    fun toggleFavorite(currencyCode: String){
-        val currencyFavorites = _favorites.value.toMutableSet()
-        if(currencyFavorites.contains(currencyCode)){
-            currencyFavorites.remove(currencyCode)
-        } else {
-            currencyFavorites.add(currencyCode)
+    val favorites = userPrefsRepository.favoritesFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), setOf("USD", "EUR"))
+    val isCommissionEnabled = userPrefsRepository.isCommissionEnabledFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    fun toggleFavorite(currencyCode: String) {
+        viewModelScope.launch {
+            val currentFavorites = favorites.value.toMutableSet()
+            if (currentFavorites.contains(currencyCode)) {
+                currentFavorites.remove(currencyCode)
+            } else {
+                currentFavorites.add(currencyCode)
+            }
+            userPrefsRepository.saveFavorites(currentFavorites)
         }
-        _favorites.value = currencyFavorites
     }
     fun fetchRates(baseCurrency: String) {
         viewModelScope.launch {
@@ -75,15 +87,26 @@ class ConverterViewModel @Inject constructor(
         return String.format(java.util.Locale.US, "%.2f", result)
     }
     fun swapCurrencies() {
-        val tempCurrency = _fromCurrency.value
-        _fromCurrency.value = _toCurrency.value
-        _toCurrency.value = tempCurrency
+        viewModelScope.launch {
+            val currentFrom = fromCurrency.value
+            val currentTo = toCurrency.value
+            userPrefsRepository.saveFromCurrency(currentTo)
+            userPrefsRepository.saveToCurrency(currentFrom)
+        }
     }
+
     fun selectCurrency(currencyCode: String, isFrom: Boolean){
-        if(isFrom){
-            _fromCurrency.value = currencyCode
-        }else{
-            _toCurrency.value = currencyCode
+        viewModelScope.launch {
+            if (isFrom) {
+                userPrefsRepository.saveFromCurrency(currencyCode)
+            } else {
+                userPrefsRepository.saveToCurrency(currencyCode)
+            }
+        }
+    }
+    fun setCommissionEnabled(isEnabled: Boolean) {
+        viewModelScope.launch {
+            userPrefsRepository.saveCommissionEnabled(isEnabled)
         }
     }
 }

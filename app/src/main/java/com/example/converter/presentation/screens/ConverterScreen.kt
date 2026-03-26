@@ -85,7 +85,7 @@ fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewMod
     val amountFrom by viewModel.amountFrom.collectAsState()
     val fromCurrency by viewModel.fromCurrency.collectAsState()
     val toCurrency by viewModel.toCurrency.collectAsState()
-    var isCommissionEnabled by remember { mutableStateOf(false) }
+    val isCommissionEnabled by viewModel.isCommissionEnabled.collectAsState()
     val amountTo = viewModel.calculateResult(state.rates, isCommissionEnabled)
 
     Column(
@@ -159,7 +159,7 @@ fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewMod
         Spacer(modifier = Modifier.height(24.dp))
         CommissionCard(
             isCommissionEnabled = isCommissionEnabled,
-            onCheckedChange = {isCommissionEnabled = it}
+            onCheckedChange = {viewModel.setCommissionEnabled(it)}
         )
     }
 }

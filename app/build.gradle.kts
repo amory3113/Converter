@@ -79,4 +79,6 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     implementation("io.coil-kt:coil-compose:2.5.0")
+
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 }
