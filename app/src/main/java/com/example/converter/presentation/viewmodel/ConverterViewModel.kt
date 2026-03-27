@@ -39,6 +39,12 @@ class ConverterViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
     val commissionValue = userPrefsRepository.commissionValueFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 2.0f)
+    private val _multiAmount = MutableStateFlow("100")
+    val multiAmount: StateFlow<String> = _multiAmount.asStateFlow()
+    val multiBaseCurrency = userPrefsRepository.multiBaseCurrencyFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "USD")
+    val multiTargetCurrencies = userPrefsRepository.multiTargetCurrenciesFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), setOf("EUR", "GBP", "JPY"))
 
     fun toggleFavorite(currencyCode: String) {
         viewModelScope.launch {
@@ -78,13 +84,20 @@ class ConverterViewModel @Inject constructor(
             _amountFrom.value = sanitizerAmount
         }
     }
-    fun calculateResult(rates: Map<String, Double>, isCommissionEnabled: Boolean): String{
-        val amount = _amountFrom.value.toDoubleOrNull() ?: return ""
-        val rateFrom = rates[_fromCurrency.value] ?: 1.0
-        val rateTo = rates[_toCurrency.value] ?: 1.0
+    fun calculateResult(
+        amountStr: String,
+        fromCurr: String,
+        toCurr: String,
+        rates: Map<String, Double>,
+        isCommissionEnabled: Boolean,
+        commissionPercent: Float
+    ): String {
+        val amount = amountStr.toDoubleOrNull() ?: return ""
+        val rateFrom = rates[fromCurr] ?: 1.0
+        val rateTo = rates[toCurr] ?: 1.0
         var result = (amount / rateFrom) * rateTo
         if (isCommissionEnabled) {
-            val percentage = commissionValue.value / 100.0
+            val percentage = commissionPercent / 100.0
             result -= result * percentage
         }
         return String.format(java.util.Locale.US, "%.2f", result)
@@ -106,7 +119,6 @@ class ConverterViewModel @Inject constructor(
             userPrefsRepository.saveToCurrency(currentFrom)
         }
     }
-
     fun selectCurrency(currencyCode: String, isFrom: Boolean){
         viewModelScope.launch {
             if (isFrom) {
@@ -120,5 +132,48 @@ class ConverterViewModel @Inject constructor(
         viewModelScope.launch {
             userPrefsRepository.saveCommissionEnabled(isEnabled)
         }
+    }
+    fun updateMultiAmount(newAmount: String){
+        val sanitizedAmount = newAmount.replace(",", ".")
+        if(sanitizedAmount.isEmpty() || sanitizedAmount.matches(Regex("^\\d*\\.?\\d*$"))){
+            _multiAmount.value = sanitizedAmount
+        }
+    }
+    fun updateMultiBaseCurrency(currencyCode: String){
+        viewModelScope.launch {
+            userPrefsRepository.saveMultiBaseCurrency(currencyCode)
+        }
+    }
+    fun addMultiTargetCurrency(currencyCode: String){
+        viewModelScope.launch{
+            val currencyList = multiTargetCurrencies.value.toMutableSet()
+            currencyList.add(currencyCode)
+            userPrefsRepository.saveMultiTargetCurrencies(currencyList)
+        }
+    }
+    fun removeMultiTargetCurrency(currencyCode: String) {
+        viewModelScope.launch {
+            val currentList = multiTargetCurrencies.value.toMutableSet()
+            currentList.remove(currencyCode)
+            userPrefsRepository.saveMultiTargetCurrencies(currentList)
+        }
+    }
+    fun calculateMultiResult(
+        amountStr: String,
+        baseCurrency: String,
+        targetCurrency: String,
+        rates: Map<String, Double>,
+        isCommissionEnabled: Boolean,
+        commissionPercent: Float
+    ): String {
+        val amount = amountStr.toDoubleOrNull() ?: return ""
+        val rateFrom = rates[baseCurrency] ?: 1.0
+        val rateTo = rates[targetCurrency] ?: 1.0
+        var result = (amount / rateFrom) * rateTo
+        if (isCommissionEnabled) {
+            val percentage = commissionPercent / 100.0
+            result -= result * percentage
+        }
+        return String.format(java.util.Locale.US, "%.2f", result)
     }
 }

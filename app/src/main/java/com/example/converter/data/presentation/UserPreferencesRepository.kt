@@ -2,6 +2,7 @@ package com.example.converter.data.presentation
 
 import android.R
 import android.content.Context
+import android.icu.number.Precision.currency
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -22,6 +23,8 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         val IS_COMMISSION_ENABLED = booleanPreferencesKey("is_commission_enabled")
         val FAVORITES = stringSetPreferencesKey("favorites")
         val COMMISSIONS_VALUE = floatPreferencesKey("commissions_value")
+        val MULTI_BASE_CURRENCY = stringPreferencesKey("multi_base_currency")
+        val MULTI_TARGET_CURRENCIES = stringSetPreferencesKey("multi_target_currency")
     }
 
     val fromCurrencyFlow: Flow<String> = dataStore.data.map {
@@ -39,8 +42,14 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
     val favoritesFlow: Flow<Set<String>> = dataStore.data.map {
         preferences -> preferences[PreferencesKeys.FAVORITES] ?: setOf("USD", "EUR")
     }
-    val commissionValueFlow: Flow<Float> = dataStore.data.map{
+    val commissionValueFlow: Flow<Float> = dataStore.data.map {
         preferences -> preferences[PreferencesKeys.COMMISSIONS_VALUE] ?: 2.0f
+    }
+    val multiBaseCurrencyFlow: Flow<String> = dataStore.data.map {
+        preferences -> preferences[PreferencesKeys.MULTI_BASE_CURRENCY] ?: "USD"
+    }
+    val multiTargetCurrenciesFlow: Flow<Set<String>> = dataStore.data.map {
+        preferences -> preferences[PreferencesKeys.MULTI_TARGET_CURRENCIES] ?: setOf("EUR", "GBP", "JPY")
     }
 
     suspend fun saveFromCurrency(currency: String){
@@ -58,5 +67,11 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
     }
     suspend fun saveCommissionsValue(value: Float){
         dataStore.edit { preferences -> preferences[PreferencesKeys.COMMISSIONS_VALUE] = value }
+    }
+    suspend fun saveMultiBaseCurrency(currency: String){
+        dataStore.edit { preferences -> preferences[PreferencesKeys.MULTI_BASE_CURRENCY] = currency }
+    }
+    suspend fun saveMultiTargetCurrencies(currencies: Set<String>) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.MULTI_TARGET_CURRENCIES] = currencies }
     }
 }

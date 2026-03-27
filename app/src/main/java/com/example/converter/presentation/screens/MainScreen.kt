@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.converter.presentation.navigation.Screen
 import com.example.converter.presentation.viewmodel.ConverterViewModel
+import com.example.converter.R
 
 @Composable
 fun MainScreen(
@@ -67,12 +68,17 @@ fun MainScreen(
                     viewModel = viewModel,
                     onNavigateToSelectCurrency = {
                         isFrom ->
-                        navController.navigate("currency_selection/$isFrom")
+                        val mode = if (isFrom) "exchange_from" else "exchange_to"
+                        navController.navigate("currency_selection/$mode")
                     }
                 )
             }
-            composable(Screen.Multi.route){
-                Text("zaglushka")
+            composable(Screen.Multi.route) {
+                MultiScreen(
+                    viewModel = viewModel,
+                    onSelectBaseCurrency = { navController.navigate("currency_selection/multi_base") },
+                    onAddTargetCurrency = { navController.navigate("currency_selection/multi_add") }
+                )
             }
             composable(Screen.Setting.route){
                 SettingScreen(
@@ -80,13 +86,13 @@ fun MainScreen(
                 )
             }
             composable(
-                route = "currency_selection/{isFrom}",
-                arguments = listOf(navArgument("isFrom") { type = NavType.BoolType })
+                route = "currency_selection/{mode}",
+                arguments = listOf(navArgument("mode") { type = NavType.StringType })
             ) { backStackEntry ->
-                val isFrom = backStackEntry.arguments?.getBoolean("isFrom") ?: true
+                val mode = backStackEntry.arguments?.getString("mode") ?: "exchange_from"
 
                 CurrencySelectionScreen(
-                    isFrom = isFrom,
+                    mode = mode,
                     viewModel = viewModel,
                     onBackClick = { navController.popBackStack() }
                 )

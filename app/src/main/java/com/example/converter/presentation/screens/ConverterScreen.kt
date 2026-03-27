@@ -33,7 +33,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -87,7 +86,14 @@ fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewMod
     val toCurrency by viewModel.toCurrency.collectAsState()
     val isCommissionEnabled by viewModel.isCommissionEnabled.collectAsState()
     val commissionValue by viewModel.commissionValue.collectAsState()
-    val amountTo = viewModel.calculateResult(state.rates, isCommissionEnabled)
+    val amountTo = viewModel.calculateResult(
+        amountStr = amountFrom,
+        fromCurr = fromCurrency,
+        toCurr = toCurrency,
+        rates = state.rates,
+        isCommissionEnabled = isCommissionEnabled,
+        commissionPercent = commissionValue
+    )
 
     Column(
         modifier = Modifier
@@ -280,7 +286,8 @@ fun CommissionCard(
             Text(
                 text = stringResource(R.string.label_commission) + " ($commissionValue%)",
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 18.sp
             )
             Switch(
                 checked = isCommissionEnabled,

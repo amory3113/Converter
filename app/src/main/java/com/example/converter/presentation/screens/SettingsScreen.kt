@@ -25,9 +25,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.converter.R
 import androidx.compose.ui.unit.sp
 import androidx.room.util.TableInfo
 import com.example.converter.presentation.viewmodel.ConverterViewModel
@@ -47,9 +49,10 @@ fun SettingScreen(viewModel: ConverterViewModel){
             .padding(20.dp)
     ){
         Text(
-            text = "Settings",
+            text = stringResource(R.string.title_settings),
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onBackground,
+            fontSize = 32.sp
         )
         Spacer(modifier = Modifier.padding(24.dp))
         Card(
@@ -66,7 +69,7 @@ fun SettingScreen(viewModel: ConverterViewModel){
                 horizontalArrangement = Arrangement.SpaceBetween
             ){
                 Text(
-                    text = "Commission",
+                    text = stringResource(R.string.title_commission),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 20.sp

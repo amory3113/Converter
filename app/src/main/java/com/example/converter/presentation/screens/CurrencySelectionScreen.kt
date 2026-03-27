@@ -51,7 +51,7 @@ import com.example.converter.presentation.viewmodel.CurrencyUiState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CurrencySelectionScreen(
-    isFrom: Boolean,
+    mode: String,
     onBackClick: () -> Unit,
     viewModel: ConverterViewModel,
     ){
@@ -134,7 +134,12 @@ fun CurrencySelectionScreen(
                         isFavorite = true,
                         onFavoriteClick = { viewModel.toggleFavorite(currencyCode) },
                         onClick = {
-                            viewModel.selectCurrency(currencyCode, isFrom)
+                            when (mode) {
+                                "exchange_from" -> viewModel.selectCurrency(currencyCode, true)
+                                "exchange_to" -> viewModel.selectCurrency(currencyCode, false)
+                                "multi_base" -> viewModel.updateMultiBaseCurrency(currencyCode)
+                                "multi_add" -> viewModel.addMultiTargetCurrency(currencyCode)
+                            }
                             onBackClick()
                         }
                     )
@@ -156,7 +161,12 @@ fun CurrencySelectionScreen(
                         isFavorite = false,
                         onFavoriteClick = { viewModel.toggleFavorite(currencyCode) },
                         onClick = {
-                            viewModel.selectCurrency(currencyCode, isFrom)
+                            when (mode) {
+                                "exchange_from" -> viewModel.selectCurrency(currencyCode, true)
+                                "exchange_to" -> viewModel.selectCurrency(currencyCode, false)
+                                "multi_base" -> viewModel.updateMultiBaseCurrency(currencyCode)
+                                "multi_add" -> viewModel.addMultiTargetCurrency(currencyCode)
+                            }
                             onBackClick()
                         }
                     )

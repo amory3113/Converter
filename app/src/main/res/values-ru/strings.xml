@@ -10,10 +10,18 @@
     <string name="status_actual_offline">Актуально на 14:30 (Офлайн)</string>
     <string name="label_from">У меня есть (Отдаю)</string>
     <string name="label_to">Я получу</string>
-    <string name="label_commission">Комиссия банка (%)</string>
+    <string name="label_commission">Комиссия банка</string>
 
     <string name="title_select_currency">Выбрать валюту</string>
-    <string name="search_hint">Поиск валюты или страны...</string>
+    <string name="search_hint">Поиск валюты...</string>
     <string name="category_favorites">ИЗБРАННЫЕ</string>
     <string name="category_all">ВСЕ ВАЛЮТЫ</string>
+
+    <string name="title_settings">Настройки</string>
+    <string name="title_commission">Комиссия</string>
+
+    <string name="multi_exchange_title">Мульти-обмен</string>
+    <string name="multi_base_currency">Базовая валюта</string>
+    <string name="conversion">КОНВЕРТАЦИЯ</string>
+    <string name="add_target_currency">Добавить валюту</string>
 </resources>
