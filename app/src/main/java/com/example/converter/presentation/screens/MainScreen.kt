@@ -19,10 +19,13 @@ import androidx.navigation.navArgument
 import com.example.converter.presentation.navigation.Screen
 import com.example.converter.presentation.viewmodel.ConverterViewModel
 import com.example.converter.R
+import com.example.converter.presentation.viewmodel.MultiViewModel
+import com.example.converter.presentation.viewmodel.SettingsViewModel
 
 @Composable
 fun MainScreen(
-    viewModel: ConverterViewModel = hiltViewModel()
+    viewModel: ConverterViewModel = hiltViewModel(),
+    multiViewModel: MultiViewModel = hiltViewModel()
 ){
     val navController = rememberNavController()
     val items = listOf(
@@ -75,15 +78,14 @@ fun MainScreen(
             }
             composable(Screen.Multi.route) {
                 MultiScreen(
-                    viewModel = viewModel,
+                    viewModel = multiViewModel,
                     onSelectBaseCurrency = { navController.navigate("currency_selection/multi_base") },
                     onAddTargetCurrency = { navController.navigate("currency_selection/multi_add") }
                 )
             }
             composable(Screen.Setting.route){
-                SettingScreen(
-                    viewModel = viewModel
-                )
+                val settingsViewModel: SettingsViewModel = hiltViewModel()
+                SettingScreen(viewModel = settingsViewModel)
             }
             composable(
                 route = "currency_selection/{mode}",
@@ -94,6 +96,7 @@ fun MainScreen(
                 CurrencySelectionScreen(
                     mode = mode,
                     viewModel = viewModel,
+                    multiViewModel = multiViewModel,
                     onBackClick = { navController.popBackStack() }
                 )
             }

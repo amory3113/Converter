@@ -33,11 +33,12 @@ import com.example.converter.R
 import androidx.compose.ui.unit.sp
 import androidx.room.util.TableInfo
 import com.example.converter.presentation.viewmodel.ConverterViewModel
+import com.example.converter.presentation.viewmodel.SettingsViewModel
 import kotlinx.serialization.ExperimentalSerializationApi
 
 @OptIn(ExperimentalSerializationApi::class)
 @Composable
-fun SettingScreen(viewModel: ConverterViewModel){
+fun SettingScreen(viewModel: SettingsViewModel){
     val commissionValue by viewModel.commissionValue.collectAsState()
     var inputText by remember(commissionValue) {
         val text = if (commissionValue % 1 == 0f) commissionValue.toInt().toString() else commissionValue.toString()

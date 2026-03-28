@@ -47,6 +47,7 @@ import com.example.converter.R
 import com.example.converter.presentation.getFlagUrl
 import com.example.converter.presentation.viewmodel.ConverterViewModel
 import com.example.converter.presentation.viewmodel.CurrencyUiState
+import com.example.converter.presentation.viewmodel.MultiViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,6 +55,7 @@ fun CurrencySelectionScreen(
     mode: String,
     onBackClick: () -> Unit,
     viewModel: ConverterViewModel,
+    multiViewModel: MultiViewModel,
     ){
     var searchQuery by remember { mutableStateOf("")}
     val uiState by viewModel.uiState.collectAsState()
@@ -137,8 +139,8 @@ fun CurrencySelectionScreen(
                             when (mode) {
                                 "exchange_from" -> viewModel.selectCurrency(currencyCode, true)
                                 "exchange_to" -> viewModel.selectCurrency(currencyCode, false)
-                                "multi_base" -> viewModel.updateMultiBaseCurrency(currencyCode)
-                                "multi_add" -> viewModel.addMultiTargetCurrency(currencyCode)
+                                "multi_base" -> multiViewModel.updateMultiBaseCurrency(currencyCode)
+                                "multi_add" -> multiViewModel.addMultiTargetCurrency(currencyCode)
                             }
                             onBackClick()
                         }
@@ -164,8 +166,8 @@ fun CurrencySelectionScreen(
                             when (mode) {
                                 "exchange_from" -> viewModel.selectCurrency(currencyCode, true)
                                 "exchange_to" -> viewModel.selectCurrency(currencyCode, false)
-                                "multi_base" -> viewModel.updateMultiBaseCurrency(currencyCode)
-                                "multi_add" -> viewModel.addMultiTargetCurrency(currencyCode)
+                                "multi_base" -> multiViewModel.updateMultiBaseCurrency(currencyCode)
+                                "multi_add" -> multiViewModel.addMultiTargetCurrency(currencyCode)
                             }
                             onBackClick()
                         }

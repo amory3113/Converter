@@ -35,16 +35,10 @@ class ConverterViewModel @Inject constructor(
     private val _favorites = MutableStateFlow<Set<String>>(setOf("USD", "EUR"))
     val favorites = userPrefsRepository.favoritesFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), setOf("USD", "EUR"))
-    val isCommissionEnabled = userPrefsRepository.isCommissionEnabledFlow
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
     val commissionValue = userPrefsRepository.commissionValueFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 2.0f)
-    private val _multiAmount = MutableStateFlow("100")
-    val multiAmount: StateFlow<String> = _multiAmount.asStateFlow()
-    val multiBaseCurrency = userPrefsRepository.multiBaseCurrencyFlow
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "USD")
-    val multiTargetCurrencies = userPrefsRepository.multiTargetCurrenciesFlow
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), setOf("EUR", "GBP", "JPY"))
+    val isCommissionEnabled = userPrefsRepository.isCommissionEnabledFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     fun toggleFavorite(currencyCode: String) {
         viewModelScope.launch {
@@ -102,15 +96,6 @@ class ConverterViewModel @Inject constructor(
         }
         return String.format(java.util.Locale.US, "%.2f", result)
     }
-    fun updateCommissionValue(newValue: String) {
-        val sanitized = newValue.replace(",", ".")
-        val floatValue = sanitized.toFloatOrNull()
-        if(floatValue != null && floatValue >= 0f){
-            viewModelScope.launch {
-                userPrefsRepository.saveCommissionsValue(floatValue)
-            }
-        }
-    }
     fun swapCurrencies() {
         viewModelScope.launch {
             val currentFrom = fromCurrency.value
@@ -132,48 +117,5 @@ class ConverterViewModel @Inject constructor(
         viewModelScope.launch {
             userPrefsRepository.saveCommissionEnabled(isEnabled)
         }
-    }
-    fun updateMultiAmount(newAmount: String){
-        val sanitizedAmount = newAmount.replace(",", ".")
-        if(sanitizedAmount.isEmpty() || sanitizedAmount.matches(Regex("^\\d*\\.?\\d*$"))){
-            _multiAmount.value = sanitizedAmount
-        }
-    }
-    fun updateMultiBaseCurrency(currencyCode: String){
-        viewModelScope.launch {
-            userPrefsRepository.saveMultiBaseCurrency(currencyCode)
-        }
-    }
-    fun addMultiTargetCurrency(currencyCode: String){
-        viewModelScope.launch{
-            val currencyList = multiTargetCurrencies.value.toMutableSet()
-            currencyList.add(currencyCode)
-            userPrefsRepository.saveMultiTargetCurrencies(currencyList)
-        }
-    }
-    fun removeMultiTargetCurrency(currencyCode: String) {
-        viewModelScope.launch {
-            val currentList = multiTargetCurrencies.value.toMutableSet()
-            currentList.remove(currencyCode)
-            userPrefsRepository.saveMultiTargetCurrencies(currentList)
-        }
-    }
-    fun calculateMultiResult(
-        amountStr: String,
-        baseCurrency: String,
-        targetCurrency: String,
-        rates: Map<String, Double>,
-        isCommissionEnabled: Boolean,
-        commissionPercent: Float
-    ): String {
-        val amount = amountStr.toDoubleOrNull() ?: return ""
-        val rateFrom = rates[baseCurrency] ?: 1.0
-        val rateTo = rates[targetCurrency] ?: 1.0
-        var result = (amount / rateFrom) * rateTo
-        if (isCommissionEnabled) {
-            val percentage = commissionPercent / 100.0
-            result -= result * percentage
-        }
-        return String.format(java.util.Locale.US, "%.2f", result)
     }
 }

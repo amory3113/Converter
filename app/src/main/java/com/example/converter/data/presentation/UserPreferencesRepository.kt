@@ -65,7 +65,7 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun saveFavorites(favorites: Set<String>) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.FAVORITES] = favorites }
     }
-    suspend fun saveCommissionsValue(value: Float){
+    suspend fun saveCommissionValue(value: Float){
         dataStore.edit { preferences -> preferences[PreferencesKeys.COMMISSIONS_VALUE] = value }
     }
     suspend fun saveMultiBaseCurrency(currency: String){

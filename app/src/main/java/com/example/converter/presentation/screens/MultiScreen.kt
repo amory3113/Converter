@@ -31,10 +31,11 @@ import com.example.converter.R
 import com.example.converter.presentation.getFlagUrl
 import com.example.converter.presentation.viewmodel.ConverterViewModel
 import com.example.converter.presentation.viewmodel.CurrencyUiState
+import com.example.converter.presentation.viewmodel.MultiViewModel
 
 @Composable
 fun MultiScreen(
-    viewModel: ConverterViewModel,
+    viewModel: MultiViewModel,
     onSelectBaseCurrency: () -> Unit = {},
     onAddTargetCurrency: () -> Unit = {}
 ) {
@@ -65,15 +66,16 @@ fun MultiScreen(
             onClick = onSelectBaseCurrency
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
 
-        CommissionCard(
-            isCommissionEnabled = isCommissionEnabled,
-            commissionValue = commissionValue,
-            onCheckedChange = {viewModel.setCommissionEnabled(it)}
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Box(
+            modifier = Modifier.fillMaxWidth().padding(20.dp)
+        ){
+            CommissionCard(
+                isCommissionEnabled = isCommissionEnabled,
+                commissionValue = commissionValue,
+                onCheckedChange = {viewModel.setCommissionEnabled(it)}
+            )
+        }
 
         Text(
             text = stringResource(R.string.conversion),
@@ -138,7 +140,7 @@ fun MultiBaseCurrencyCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 18.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(blueGradient)
             .padding(20.dp)
