@@ -23,4 +23,7 @@
     <string name="multi_base_currency">Base currency</string>
     <string name="conversion">CONVERSION</string>
     <string name="add_target_currency">Add target currency</string>
+
+    <string name="update">Updated:</string>
+    <string name="offline">Offline</string>
 </resources>

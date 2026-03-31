@@ -5,7 +5,8 @@ sealed class CurrencyUiState {
     data class Success(
         val baseCurrency: String,
         val rates: Map<String, Double>,
-        val timeLastUpdated: Long
+        val timeLastUpdated: Long,
+        val isOffline: Boolean = false
     ) : CurrencyUiState()
     data class Error(val message: String) : CurrencyUiState()
 }

@@ -32,7 +32,8 @@ class MultiViewModel @Inject constructor(
                     _uiState.value = CurrencyUiState.Success(
                         baseCurrency = response.baseCurrency,
                         rates = response.rates,
-                        timeLastUpdated = response.timeLastUpdated
+                        timeLastUpdated = response.timeLastUpdated,
+                        isOffline = response.isOffline
                     )
                 },
                 onFailure = {

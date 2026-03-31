@@ -24,4 +24,7 @@
     <string name="multi_base_currency">Базовая валюта</string>
     <string name="conversion">КОНВЕРТАЦИЯ</string>
     <string name="add_target_currency">Добавить валюту</string>
+
+    <string name="update">Обновлено:</string>
+    <string name="offline">Оффлайн</string>
 </resources>

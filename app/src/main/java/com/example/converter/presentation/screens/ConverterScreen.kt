@@ -36,6 +36,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +53,9 @@ import com.example.converter.presentation.viewmodel.CurrencyUiState
 import java.util.Currency
 import com.example.converter.R
 import com.example.converter.presentation.getFlagUrl
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun ConverterScreen(viewModel: ConverterViewModel = hiltViewModel(), onNavigateToSelectCurrency: (Boolean) -> Unit) {
@@ -112,17 +117,16 @@ fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewMod
             verticalAlignment = Alignment.CenterVertically
         ){
             Icon(
-                painter = painterResource(R.drawable.ic_launcher_foreground),
+                imageVector = if (state.isOffline) Icons.Default.CloudOff else Icons.Default.CloudDone,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = if (state.isOffline) Color(0xFFE57373) else Color(0xFF81C784),
                 modifier = Modifier.size(16.dp)
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = stringResource(R.string.status_actual_offline),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-                fontSize = 16.sp
+                text = "${stringResource(R.string.update)} ${formatUpdateTime(state.timeLastUpdated)}" + if (state.isOffline) " ${stringResource(R.string.offline)}" else "",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
         }
         Spacer(modifier = Modifier.height(30.dp))
@@ -301,5 +305,10 @@ fun CommissionCard(
             )
         }
     }
+}
+
+fun formatUpdateTime(timestamp: Long): String {
+    val sdf = SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault())
+    return sdf.format(Date(timestamp * 1000L))
 }
 

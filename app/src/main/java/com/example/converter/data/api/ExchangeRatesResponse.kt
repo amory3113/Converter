@@ -10,5 +10,6 @@ data class ExchangeRatesResponse(
     @SerialName("time_last_updated")
     val timeLastUpdated: Long,
     @SerialName("rates")
-    val rates: Map<String, Double>
+    val rates: Map<String, Double>,
+    var isOffline: Boolean = false
 )
