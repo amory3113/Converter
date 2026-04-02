@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import net.objecthunter.exp4j.ExpressionBuilder
 
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
@@ -74,9 +75,9 @@ class ConverterViewModel @Inject constructor(
         }
     }
     fun updateAmount(newAmount: String){
-        val sanitizerAmount = newAmount.replace(",", ".")
-        if(sanitizerAmount.isEmpty() || sanitizerAmount.matches(Regex("^\\d*\\.?\\d*$"))){
-            _amountFrom.value = sanitizerAmount
+        val sanitizedAmount = newAmount.replace(",", ".")
+        if (sanitizedAmount.isEmpty() || sanitizedAmount.matches(Regex("^[0-9+\\-*/(). ]*$"))) {
+            _amountFrom.value = sanitizedAmount
         }
     }
     fun calculateResult(
@@ -87,7 +88,11 @@ class ConverterViewModel @Inject constructor(
         isCommissionEnabled: Boolean,
         commissionPercent: Float
     ): String {
-        val amount = amountStr.toDoubleOrNull() ?: return ""
+        val amount = try {
+            ExpressionBuilder(amountStr).build().evaluate()
+        } catch (e: Exception) {
+            return ""
+        }
         val rateFrom = rates[fromCurr] ?: 1.0
         val rateTo = rates[toCurr] ?: 1.0
         var result = (amount / rateFrom) * rateTo

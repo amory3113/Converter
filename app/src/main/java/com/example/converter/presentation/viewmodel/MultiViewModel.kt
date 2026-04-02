@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import net.objecthunter.exp4j.ExpressionBuilder
 
 @HiltViewModel
 class MultiViewModel @Inject constructor(
@@ -54,7 +55,7 @@ class MultiViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 2.0f)
     fun updateMultiAmount(newAmount: String) {
         val sanitizedAmount = newAmount.replace(",", ".")
-        if(sanitizedAmount.isEmpty() || sanitizedAmount.matches(Regex("^\\d*\\.?\\d*$"))) {
+        if (sanitizedAmount.isEmpty() || sanitizedAmount.matches(Regex("^[0-9+\\-*/(). ]*$"))) {
             _multiAmount.value = sanitizedAmount
         }
     }
@@ -84,7 +85,11 @@ class MultiViewModel @Inject constructor(
         amountStr: String, baseCurrency: String, targetCurrency: String,
         rates: Map<String, Double>, isCommissionEnabled: Boolean, commissionPercent: Float
     ): String {
-        val amount = amountStr.toDoubleOrNull() ?: return ""
+        val amount = try {
+            ExpressionBuilder(amountStr).build().evaluate()
+        } catch (e: Exception) {
+            return ""
+        }
         val rateFrom = rates[baseCurrency] ?: 1.0
         val rateTo = rates[targetCurrency] ?: 1.0
         var result = (amount / rateFrom) * rateTo

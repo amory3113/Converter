@@ -245,7 +245,7 @@ fun CurrencyInputCard(
                         fontSize = 32.sp
                     ),
                     modifier = Modifier.weight(1f).padding(start = 16.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     singleLine = true,
                     decorationBox = { innerTextField ->
                         Box(
