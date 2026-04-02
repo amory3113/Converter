@@ -100,4 +100,17 @@ class MultiViewModel @Inject constructor(
         }
         return String.format(java.util.Locale.US, "%.2f", result)
     }
+    fun appendMultiAmount(symbol: String) {
+        val current = _multiAmount.value
+        updateMultiAmount(current + symbol)
+    }
+    fun backspaceMultiAmount() {
+        val current = _multiAmount.value
+        if (current.isNotEmpty()) {
+            updateMultiAmount(current.dropLast(1))
+        }
+    }
+    fun clearMultiAmount() {
+        updateMultiAmount("")
+    }
 }

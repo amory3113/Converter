@@ -1,6 +1,12 @@
 package com.example.converter.presentation.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +17,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -38,6 +54,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -84,6 +102,7 @@ fun ConverterScreen(viewModel: ConverterViewModel = hiltViewModel(), onNavigateT
         }
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewModel, onCurrencyClick: (Boolean) -> Unit){
     val amountFrom by viewModel.amountFrom.collectAsState()
@@ -99,7 +118,9 @@ fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewMod
         isCommissionEnabled = isCommissionEnabled,
         commissionPercent = commissionValue
     )
-
+    var isKeyboardVisible by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -130,6 +151,7 @@ fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewMod
             )
         }
         Spacer(modifier = Modifier.height(30.dp))
+
         Box(modifier = Modifier.fillMaxWidth()) {
             Column{
                 CurrencyInputCard(
@@ -138,7 +160,8 @@ fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewMod
                     amount = amountFrom,
                     onAmountChange = { viewModel.updateAmount(it) },
                     onCurrencyClick = { onCurrencyClick(true) },
-                    isEditable = true
+                    isEditable = true,
+                    onInputClick = { isKeyboardVisible = true }
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 CurrencyInputCard(
@@ -171,8 +194,27 @@ fun ConverterContent(state: CurrencyUiState.Success, viewModel: ConverterViewMod
         CommissionCard(
             isCommissionEnabled = isCommissionEnabled,
             commissionValue = commissionValue,
-            onCheckedChange = {viewModel.setCommissionEnabled(it)}
+            onCheckedChange = { viewModel.setCommissionEnabled(it) }
         )
+    }
+
+    if (isKeyboardVisible) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                isKeyboardVisible = false
+                focusManager.clearFocus()
+            },
+            sheetState = sheetState,
+            dragHandle = null,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f),
+        ) {
+            CustomKeyboard(
+                onKeyClick = { symbol -> viewModel.appendToAmount(symbol) },
+                onBackspace = { viewModel.backspaceAmount() },
+                onClear = { viewModel.clearAmount() },
+                modifier = Modifier.padding(bottom = 24.dp, top = 8.dp)
+            )
+        }
     }
 }
 
@@ -185,8 +227,20 @@ fun CurrencyInputCard(
     onAmountChange: (String) -> Unit,
     onCurrencyClick: () -> Unit,
     isEditable: Boolean,
-    amountColor: Color = MaterialTheme.colorScheme.onSurface
+    amountColor: Color = MaterialTheme.colorScheme.onSurface,
+    onInputClick: () -> Unit = {}
 ){
+    var textFieldValue by remember {
+        mutableStateOf(TextFieldValue(text = amount, selection = TextRange(amount.length)))
+    }
+    LaunchedEffect(amount) {
+        if (amount != textFieldValue.text) {
+            textFieldValue = textFieldValue.copy(
+                text = amount,
+                selection = TextRange(amount.length)
+            )
+        }
+    }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -235,36 +289,58 @@ fun CurrencyInputCard(
                         )
                     }
                 }
-                BasicTextField(
-                    value = amount,
-                    onValueChange = onAmountChange,
-                    readOnly = !isEditable,
-                    textStyle = MaterialTheme.typography.headlineMedium.copy(
-                        color = amountColor,
-                        textAlign = TextAlign.End,
-                        fontSize = 32.sp
-                    ),
+                Box(
                     modifier = Modifier.weight(1f).padding(start = 16.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                    singleLine = true,
-                    decorationBox = { innerTextField ->
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.CenterEnd){
-                            if(amount.isEmpty()){
-                                Text(
-                                    text = "0",
-                                    style = MaterialTheme.typography.headlineMedium.copy(
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), // Полупрозрачный цвет
-                                        textAlign = TextAlign.End,
-                                        fontSize = 32.sp
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    BasicTextField(
+                        value = textFieldValue,
+                        onValueChange = { newValue ->
+                            textFieldValue = newValue
+                            onAmountChange(newValue.text)
+                        },
+                        readOnly = true,
+                        textStyle = MaterialTheme.typography.headlineMedium.copy(
+                            color = amountColor,
+                            textAlign = TextAlign.End,
+                            fontSize = 32.sp
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        decorationBox = { innerTextField ->
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.CenterEnd
+                            ){
+                                if(textFieldValue.text.isEmpty()){
+                                    Text(
+                                        text = "0",
+                                        style = MaterialTheme.typography.headlineMedium.copy(
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                            textAlign = TextAlign.End,
+                                            fontSize = 32.sp
+                                        )
                                     )
-                                )
+                                }
+                                innerTextField()
                             }
-                            innerTextField()
                         }
+                    )
+
+                    if (isEditable) {
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    onInputClick()
+                                }
+                        )
                     }
-                )
+                }
             }
         }
     }
@@ -306,6 +382,7 @@ fun CommissionCard(
         }
     }
 }
+
 
 fun formatUpdateTime(timestamp: Long): String {
     val sdf = SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault())

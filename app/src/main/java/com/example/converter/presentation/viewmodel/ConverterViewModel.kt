@@ -124,4 +124,17 @@ class ConverterViewModel @Inject constructor(
             userPrefsRepository.saveCommissionEnabled(isEnabled)
         }
     }
+    fun backspaceAmount() {
+        val current = _amountFrom.value
+        if (current.isNotEmpty()) {
+            updateAmount(current.dropLast(1))
+        }
+    }
+    fun clearAmount() {
+        updateAmount("")
+    }
+    fun appendToAmount(symbol: String) {
+        val current = _amountFrom.value
+        updateAmount(current + symbol)
+    }
 }
