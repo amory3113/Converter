@@ -27,4 +27,6 @@
 
     <string name="update">Обновлено:</string>
     <string name="offline">Оффлайн</string>
+
+    <string name="error_no_data">Ошибка получения данных</string>
 </resources>

@@ -78,10 +78,11 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:2.7.0")
 
-    implementation("io.coil-kt:coil-compose:2.5.0")
-
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     implementation("androidx.compose.material:material-icons-extended")
     implementation("net.objecthunter:exp4j:0.4.8")
+
+    implementation("androidx.glance:glance-appwidget:1.1.0")
+    implementation("androidx.glance:glance-material3:1.1.0")
 }

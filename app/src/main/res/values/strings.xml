@@ -26,4 +26,6 @@
 
     <string name="update">Updated:</string>
     <string name="offline">Offline</string>
+
+    <string name="error_no_data">Error: No data</string>
 </resources>

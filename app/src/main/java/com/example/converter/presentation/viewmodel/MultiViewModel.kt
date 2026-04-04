@@ -1,11 +1,16 @@
 package com.example.converter.presentation.viewmodel
 
+import android.content.Context
+import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.converter.data.presentation.UserPreferencesRepository
 import com.example.converter.domain.repository.CurrencyRepository
+import com.example.converter.presentation.widget.CurrencyWidget
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +22,8 @@ import net.objecthunter.exp4j.ExpressionBuilder
 @HiltViewModel
 class MultiViewModel @Inject constructor(
     private val repository: CurrencyRepository,
-    private val userPrefsRepository: UserPreferencesRepository
+    private val userPrefsRepository: UserPreferencesRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<CurrencyUiState>(CurrencyUiState.Loading)
     val uiState: StateFlow<CurrencyUiState> = _uiState.asStateFlow()
@@ -60,13 +66,19 @@ class MultiViewModel @Inject constructor(
         }
     }
     fun updateMultiBaseCurrency(currencyCode: String) {
-        viewModelScope.launch { userPrefsRepository.saveMultiBaseCurrency(currencyCode) }
+        viewModelScope.launch {
+            userPrefsRepository.saveMultiBaseCurrency(currencyCode)
+            delay(300)
+            CurrencyWidget().updateAll(context)
+        }
     }
     fun addMultiTargetCurrency(currencyCode: String) {
         viewModelScope.launch {
             val currencyList = multiTargetCurrencies.value.toMutableSet()
             currencyList.add(currencyCode)
             userPrefsRepository.saveMultiTargetCurrencies(currencyList)
+            delay(300)
+            CurrencyWidget().updateAll(context)
         }
     }
     fun removeMultiTargetCurrency(currencyCode: String) {
@@ -74,6 +86,8 @@ class MultiViewModel @Inject constructor(
             val currentList = multiTargetCurrencies.value.toMutableSet()
             currentList.remove(currencyCode)
             userPrefsRepository.saveMultiTargetCurrencies(currentList)
+            delay(300)
+            CurrencyWidget().updateAll(context)
         }
     }
     fun setCommissionEnabled(isEnabled: Boolean) {
