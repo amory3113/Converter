@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Converter</string>
+
+    <string name="tab_exchange">Wymiana</string>
+    <string name="tab_multi">Multi</string>
+    <string name="tab_settings">Ustawienia</string>
+
+    <string name="title_converter">Konwerter</string>
+    <string name="status_actual_offline">Stan na 14:30 (Offline)</string>
+    <string name="label_from">Mam (Oddaję)</string>
+    <string name="label_to">Otrzymam</string>
+    <string name="label_commission">Prowizja bankowa</string>
+
+    <string name="title_select_currency">Wybierz walutę</string>
+    <string name="search_hint">Szukaj waluty...</string>
+    <string name="category_favorites">ULUBIONE</string>
+    <string name="category_all">WSZYSTKIE WALUTY</string>
+
+    <string name="title_settings">Ustawienia</string>
+    <string name="title_commission">Prowizja</string>
+
+    <string name="multi_exchange_title">Multi-wymiana</string>
+    <string name="multi_base_currency">Waluta bazowa</string>
+    <string name="conversion">KONWERSJA</string>
+    <string name="add_target_currency">Dodaj walutę docelową</string>
+
+    <string name="update">Zaktualizowano:</string>
+    <string name="offline">Offline</string>
+
+    <string name="error_no_data">Błąd: Brak danych</string>
+</resources>

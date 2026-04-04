@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Converter</string>
+
+    <string name="tab_exchange">Обмін</string>
+    <string name="tab_multi">Мульти</string>
+    <string name="tab_settings">Налаштування</string>
+
+    <string name="title_converter">Конвертер</string>
+    <string name="status_actual_offline">Актуально на 14:30 (Офлайн)</string>
+    <string name="label_from">Я маю (Віддаю)</string>
+    <string name="label_to">Я отримаю</string>
+    <string name="label_commission">Комісія банку</string>
+
+    <string name="title_select_currency">Оберіть валюту</string>
+    <string name="search_hint">Пошук валюти...</string>
+    <string name="category_favorites">УЛЮБЛЕНІ</string>
+    <string name="category_all">ВСІ ВАЛЮТИ</string>
+
+    <string name="title_settings">Налаштування</string>
+    <string name="title_commission">Комісія</string>
+
+    <string name="multi_exchange_title">Мультиобмін</string>
+    <string name="multi_base_currency">Базова валюта</string>
+    <string name="conversion">КОНВЕРТАЦІЯ</string>
+    <string name="add_target_currency">Додати цільову валюту</string>
+
+    <string name="update">Оновлено:</string>
+    <string name="offline">Офлайн</string>
+
+    <string name="error_no_data">Помилка: Немає даних</string>
+</resources>
