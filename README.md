@@ -54,4 +54,5 @@ To run this project locally:
 2. Open the project in Android Studio.
 3. Note: If you are using a specific Currency API (e.g., ExchangeRate-API or OpenExchangeRates), make sure to add your API Key in the local.properties file or network module (depending on your setup).
 4. Build and run the app on an emulator or a physical device.
+
 👨‍💻 Author Maksym Shevelenko, Telegram: @amory3113, Gmail: maksshevelenko@gmail.com
